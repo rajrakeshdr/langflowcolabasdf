@@ -16,26 +16,12 @@ export async function middleware(request: NextRequest) {
         get(name: string) {
           return request.cookies.get(name)?.value
         },
-        getAll() {
-          return request.cookies.getAll().reduce((acc, cookie) => {
-            acc[cookie.name] = cookie.value
-            return acc
-          }, {} as Record<string, string>)
-        },
         set(name: string, value: string, options: CookieOptions) {
           response.cookies.set({
             name,
             value,
             ...options,
           })
-        },
-        setAll(cookies: Record<string, string>) {
-          for (const [name, value] of Object.entries(cookies)) {
-            response.cookies.set({
-              name,
-              value,
-            })
-          }
         },
         remove(name: string, options: CookieOptions) {
           response.cookies.set({
@@ -47,6 +33,18 @@ export async function middleware(request: NextRequest) {
       },
     }
   )
+
+  // Define getAll outside of the createServerClient options
+  const getAllCookies = () => {
+    return request.cookies.getAll().reduce((acc, cookie) => {
+      acc[cookie.name] = cookie.value
+      return acc
+    }, {} as Record<string, string>)
+  }
+
+  // Use getAllCookies where needed
+  const allCookies = getAllCookies();
+  // console.log(allCookies) or any other use case
 
   await supabase.auth.getSession()
 
